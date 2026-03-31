@@ -1,0 +1,97 @@
+name: dependencies-meta
+buildsystem: simple
+build-commands:
+  - true
+modules:
+  - name: gtk-layer-shell
+    buildsystem: meson
+    sources:
+      - type: git
+        url: https://github.com/wmww/gtk-layer-shell.git
+        tag: v0.10.0
+
+  - name: onnxruntime
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 lib/libonnxruntime.so.1.24.2
+        /app/lib/libonnxruntime.so.1.24.2
+      - ln -sf libonnxruntime.so.1.24.2 /app/lib/libonnxruntime.so.1
+      - ln -sf libonnxruntime.so.1.24.2 /app/lib/libonnxruntime.so
+    sources:
+      - type: archive
+        url: https://blob.handy.computer/onnxruntime-linux-x86_64-1.24.2.tgz
+        sha256: 7e8062d5cda514fe3e31d805f9aabd50bed42d331994f66753d2dd697294b976
+
+  - name: silero-vad-model
+    buildsystem: simple
+    build-commands:
+      - install -Dm644 silero_vad_v4.onnx
+        /app/share/handy/models/silero_vad_v4.onnx
+    sources:
+      - type: file
+        url: https://blob.handy.computer/silero_vad_v4.onnx
+        sha256: a35ebf52fd3ce5f1469b2a36158dba761bc47b973ea3382b3186ca15b1f5af28
+        dest-filename: silero_vad_v4.onnx
+
+  - name: intltool
+    buildsystem: autotools
+    sources:
+      - type: archive
+        url: https://launchpad.net/intltool/trunk/0.51.0/+download/intltool-0.51.0.tar.gz
+        sha256: 67c74d94196b153b774ab9f89b2fa6c6ba79352407037c8c14d5aeb334e959cd
+
+  - name: dbusmenu-gtk3
+    buildsystem: simple
+    build-commands:
+      # Fix "HAVE_VALGRIND" undefined error by providing a dummy macro definition
+      # - echo "AC_DEFUN([AS_VARS_VALGRIND], [])" > valgrind_fix.m4
+      - sed -i '/AS_VARS_VALGRIND/d' configure.ac
+      - sed -i '/local_valgrind_lib/d' configure.ac
+      - sed -i '/AC_OUTPUT/i AM_CONDITIONAL([HAVE_VALGRIND], [false])' configure.ac
+      # Manually generate the configure script without gnome-common
+      - autoreconf -vfi
+      # Run configure with the required flags
+      - >
+        ./configure 
+        --prefix=/app 
+        --disable-static 
+        --disable-doxygen 
+        --disable-gtk-doc 
+        --with-gtk=3 
+        --disable-dumper 
+        --disable-tests
+
+      - make -j$(nproc)
+        # TYPELIBDIR=/app/lib/x86_64-linux-gnu/girepository-1.0
+      - make install typelibdir=/app/lib/girepository-1.0
+    sources:
+      - type: git
+        url: https://salsa.debian.org/debian-ayatana-team/libdbusmenu.git
+        tag: debian/18.10.20180917_bzr492+repack1-3
+
+  - name: libayatana-indicator
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DENABLE_TESTS=OFF
+      - -DENABLE_IDO=OFF
+      - -DENABLE_LOADER=OFF
+      - -DFLAVOUR_GTK3=ON
+      - -DFLAVOUR_GTK2=OFF
+    sources:
+      - type: git
+        url: https://github.com/AyatanaIndicators/libayatana-indicator.git
+        tag: 0.9.4
+
+  - name: libayatana-appindicator
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DENABLE_BINDINGS_MONO=OFF
+      - -DENABLE_BINDINGS_VALA=OFF
+      - -DENABLE_GTKDOC=OFF
+      - -DENABLE_TESTS=OFF
+      - -DFLAVOUR_GTK3=ON
+      - -DFLAVOUR_GTK2=OFF
+    sources:
+      - type: git
+        url: https://github.com/AyatanaIndicators/libayatana-appindicator.git
+        tag: 0.5.94
