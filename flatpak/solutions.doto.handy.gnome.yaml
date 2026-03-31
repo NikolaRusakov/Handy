@@ -23,6 +23,7 @@ finish-args:
   - --socket=fallback-x11
   - --socket=pulseaudio
   - --device=all
+  - --device=dri
   - --filesystem=home
   - --filesystem=xdg-config/autostart:create
   - --talk-name=org.freedesktop.portal.Desktop
@@ -31,6 +32,8 @@ finish-args:
   - --talk-name=org.gnome.SessionManager
   - --talk-name=solutions.doto.handy.SingleInstance # Remember to change net_mydomain_MyApp to your app ID
   - --own-name=solutions.doto.handy.SingleInstance # Remember to change net_mydomain_MyApp to your app ID
+  - --filesystem=xdg-run/webkitgtk:create
+
 modules:
   - dependencies.yaml
 
@@ -66,6 +69,7 @@ modules:
       - bun-download/bun run build
       - cargo build --release --manifest-path src-tauri/Cargo.toml
       - install -Dm755 src-tauri/target/release/handy /app/bin/handy
+      # TODO: check if Dist needs copying
       - mkdir -p /app/lib/Handy/models
       - cp -r src-tauri/resources/ /app/lib/Handy/
       - ln -sf /app/share/handy/models/silero_vad_v4.onnx
@@ -83,6 +87,7 @@ modules:
     sources:
       - type: dir
         path: ..
+      - cargo-sources.json
       - type: archive
         url: https://github.com/oven-sh/bun/releases/download/bun-v1.3.11/bun-linux-x64.zip
         sha256: 8611ba935af886f05a6f38740a15160326c15e5d5d07adef966130b4493607ed

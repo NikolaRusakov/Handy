@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Handy",
-  "version": "0.8.1",
-  "identifier": "com.pais.handy",
+  "version": "0.8.69",
+  "identifier": "solutions.doto.handy",
   "build": {
     "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:1420",

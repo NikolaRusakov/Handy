@@ -460,7 +460,8 @@ pub fn run(cli_args: CliArgs) {
 
     #[allow(unused_mut)]
     let mut builder = tauri::Builder::default()
-        .plugin(tauri_plugin_single_instance::init(|app, args, cwd| {}))
+        // .plugin(tauri_plugin_single_instance::init(|app, args, cwd| {}))
+        // .plugin(tauri_plugin_localhost::Builder::new().build())
         .device_event_filter(tauri::DeviceEventFilter::Always)
         .plugin(tauri_plugin_dialog::init())
         .plugin(
@@ -497,6 +498,15 @@ pub fn run(cli_args: CliArgs) {
     #[cfg(target_os = "macos")]
     {
         builder = builder.plugin(tauri_nspanel::init());
+    }
+
+    #[cfg(desktop)]
+    {
+        builder = builder.plugin(tauri_plugin_single_instance::init(|app, args, cwd| {
+            let _ = app.get_webview_window("main")
+                       .expect("no main window")
+                       .set_focus();
+        }));
     }
 
     builder

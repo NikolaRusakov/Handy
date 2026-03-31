@@ -172,4 +172,10 @@ bun run tauri build -- --bundles deb
 bun run tauri build -- --bundles flatpak
 ```
 
+Debug Flatpak with 
+```bash
+flatpak-builder --user --install --force-clean --repo=repo --disable-rofiles-fuse  build-dir flatpak/solutions.doto.handy.gnome.yaml
+flatpak run --env=RUST_LOG=debug --env=WEBKIT_DEBUG=all solutions.doto.handy 2>&1 | head -200
+```
+
 Then install using the deb extraction method above.
