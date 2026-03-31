@@ -5,16 +5,13 @@
   "sdk": "org.freedesktop.Sdk",
   "command": "handy",
   "sdk-extensions": [
-    "org.freedesktop.Sdk.Extension.rust-stable",
-    "org.freedesktop.Sdk.Extension.node20"
+    "org.freedesktop.Sdk.Extension.rust-stable"
   ],
   "build-options": {
-    "append-path": "/usr/lib/sdk/rust-stable/bin:/usr/lib/sdk/node20/bin",
+    "append-path": "/usr/lib/sdk/rust-stable/bin",
     "env": {
       "CARGO_HOME": "/run/build/handy/cargo-home",
-      "RUSTFLAGS": "-C link-arg=-fuse-ld=lld",
-      "npm_config_offline": "true",
-      "npm_config_cache": "/run/build/handy/npm-cache"
+      "RUSTFLAGS": "-C link-arg=-fuse-ld=lld"
     }
   },
   "finish-args": [
@@ -67,7 +64,6 @@
       "name": "handy",
       "buildsystem": "simple",
       "build-options": {
-        "append-path": "/app/",
         "env": {
           "ORT_LIB_LOCATION": "/app/lib",
           "ORT_PREFER_DYNAMIC_LINK": "1",
@@ -75,9 +71,9 @@
           "WHISPER_NO_AVX2": "ON"
         }
       },
-      "build-commands": [
-        "npm i --lockfile-only --omit=dev",
-        "npm run build",
+      "build-commands": [        
+        "BUN_DEBUG=network bun-download/bun install --omit=dev --frozen",
+        "bun-download/bun run build",
         "cargo build --release --manifest-path src-tauri/Cargo.toml",
         "install -Dm755 src-tauri/target/release/handy /app/bin/handy",
         "mkdir -p /app/bin/resources/models",
@@ -95,15 +91,17 @@
           "path": ".."
         },
         {
+          "type": "archive",
+          "url": "https://github.com/oven-sh/bun/releases/download/bun-v1.3.11/bun-linux-x64.zip",
+          "sha256": "8611ba935af886f05a6f38740a15160326c15e5d5d07adef966130b4493607ed",
+          "dest": "bun-download",
+          "strip-components": 1
+        },
+        {
           "type": "shell",
           "commands": [
             "if [ -f cargo/config ]; then mkdir -p .cargo && cp -vf cargo/config .cargo/config.toml; fi"
           ]
-        },
-        {
-          "type": "archive",
-          "url": "https://github.com/oven-sh/bun/releases/download/bun-v1.3.11/bun-linux-x64.zip",
-          "sha256": "8611ba935af886f05a6f38740a15160326c15e5d5d07adef966130b4493607ed"
         }
       ]
     }
