@@ -50,22 +50,31 @@ This guide covers how to set up the development environment and build Handy from
 ## Setup Instructions
 
 ### Build flatpak
+
 - make sure the SDK and Platform is installed:
+
   ```bash
   flatpak --user install flathub org.freedesktop.Platform/x86_64/25.0 org.freedesktop.Sdk/x86_64/25.08
   ```
+
   or Gname specific DE installation
+
   ```
   flatpak --user install flathub org.gnome.Sdk//48 org.gnome.Platform//48
   ```
 
-- build by running:
+- install and build by running:
   ```bash
   flatpak-builder --force-clean --install --repo=./ build-dir flatpak/solutions.doto.handy.yaml
   ```
+- install by running:
+  ```bash
+  flatpak-builder --user --build-only --repo=./ build-dir flatpak/solutions.doto.handy.yaml
+  ```
 
 When running in headless environment (eg. distrobox or CI) make sure you have dbus installed:
-- run 
+
+- run
   ```bash
   sudo apt install dbus dbus-x11
   eval $(dbus-launch --sh-syntax)

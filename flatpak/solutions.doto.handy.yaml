@@ -33,33 +33,6 @@ modules:
   #     - type: archive
   #       url: https://github.com/wmww/gtk4-layer-shell/archive/refs/tags/v1.1.0.tar.gz
   #       sha256: 98284281260a5eef5b4f63a55f16c4bf6a788a1020a6db037ecb0f71fa336988
-  - name: webkit2gtk-4.1
-    buildsystem: simple
-    build-commands:
-      - mkdir -p /tmp/jsc /tmp/wk /tmp/wkdev
-      - sh -c 'SRCDIR=$(pwd); cd /tmp/jsc; ar x "$SRCDIR/libjavascriptcoregtk-4.1-0.deb"; tar xf data.tar.*'
-      - sh -c 'SRCDIR=$(pwd); cd /tmp/wk; ar x "$SRCDIR/libwebkit2gtk-4.1-0.deb"; tar xf data.tar.*'
-      - sh -c 'SRCDIR=$(pwd); cd /tmp/wkdev; ar x "$SRCDIR/libwebkit2gtk-4.1-dev.deb"; tar xf data.tar.*'
-      - cp -rn /tmp/jsc/usr/lib/x86_64-linux-gnu/. /app/lib/
-      - cp -rn /tmp/wk/usr/lib/x86_64-linux-gnu/. /app/lib/
-      - mkdir -p /app/include /app/lib/pkgconfig
-      - cp -rn /tmp/wkdev/usr/include/. /app/include/
-      - find /tmp/wkdev/usr -name "*.pc" -exec cp {} /app/lib/pkgconfig/ \;
-      - sed -i 's|/usr/lib/x86_64-linux-gnu|/app/lib|g; s|prefix=/usr|prefix=/app|g'
-        /app/lib/pkgconfig/webkit2gtk-4.1.pc /app/lib/pkgconfig/javascriptcoregtk-4.1.pc
-    sources:
-      - type: file
-        url: http://security.debian.org/debian-security/pool/updates/main/w/webkit2gtk/libjavascriptcoregtk-4.1-0_2.50.6-1~deb12u1_amd64.deb
-        sha256: 754239f31aadb4119d5707fe8e5b6f10f798d050751052ec587193f5498435d5
-        dest-filename: libjavascriptcoregtk-4.1-0.deb
-      - type: file
-        url: http://security.debian.org/debian-security/pool/updates/main/w/webkit2gtk/libwebkit2gtk-4.1-0_2.50.6-1~deb12u1_amd64.deb
-        sha256: d60630e4011128af3d4fa382ea882c26906f8aae5289b151c95fd81535d59c04
-        dest-filename: libwebkit2gtk-4.1-0.deb
-      - type: file
-        url: http://security.debian.org/debian-security/pool/updates/main/w/webkit2gtk/libwebkit2gtk-4.1-dev_2.50.6-1~deb12u1_amd64.deb
-        sha256: 0cdcd610d849f144df9ec0a835a44f1d2fddaca75d13cd5990e64ca44d8b1ef8
-        dest-filename: libwebkit2gtk-4.1-dev.deb
   - name: onnxruntime
     buildsystem: simple
     build-commands:
