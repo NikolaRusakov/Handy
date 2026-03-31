@@ -63,32 +63,6 @@ jobs:
             npm package-lock.json \
             -o flatpak/node-sources.json
 
-      # ── Compute sha256 hashes for external blobs ──────────────────────────
-      #
-      # The manifest has placeholder sha256 fields for the ONNX Runtime and
-      # Silero VAD model archives.  This step downloads the files, computes
-      # their hashes, and patches the manifest in-place so flatpak-builder
-      # can verify them at build time.
-      #
-      - name: Patch manifest sha256 hashes
-        run: |
-          ORT_URL="https://blob.handy.computer/onnxruntime-linux-x86_64-1.24.2.tgz"
-          VAD_URL="https://blob.handy.computer/silero_vad_v4.onnx"
-
-          curl -fsSL -o /tmp/ort.tgz      "$ORT_URL"
-          curl -fsSL -o /tmp/silero.onnx  "$VAD_URL"
-
-          ORT_SHA=$(sha256sum /tmp/ort.tgz     | awk '{print $1}')
-          VAD_SHA=$(sha256sum /tmp/silero.onnx | awk '{print $1}')
-
-          echo "ORT sha256:    $ORT_SHA"
-          echo "Silero sha256: $VAD_SHA"
-
-          sed -i "s/FILL_IN_SHA256_RUN_sha256sum_onnxruntime-linux-x86_64-1.24.2.tgz/$ORT_SHA/" \
-            flatpak/solutions.doto.handy.json
-          sed -i "s/FILL_IN_SHA256_RUN_sha256sum_silero_vad_v4.onnx/$VAD_SHA/" \
-            flatpak/solutions.doto.handy.json
-
       # ── Build ──────────────────────────────────────────────────────────────
       - name: Build Flatpak
         run: |
