@@ -61,6 +61,9 @@ This guide covers how to set up the development environment and build Handy from
 
   ```
   flatpak --user install flathub org.gnome.Sdk//48 org.gnome.Platform//48
+  # required for base sdk
+  flatpak --user install flathub org.freedesktop.Sdk//24.08
+  flatpak install --noninteractive --user flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08 org.freedesktop.Sdk.Extension.rust-stable//24.08
   ```
 
 - install and build by running:
@@ -163,6 +166,10 @@ cd src-tauri/target/release/bundle/appimage
 
 ```bash
 bun run tauri build -- --bundles deb
+```
+
+```bash
+bun run tauri build -- --bundles flatpak
 ```
 
 Then install using the deb extraction method above.

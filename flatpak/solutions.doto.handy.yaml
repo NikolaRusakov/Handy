@@ -63,6 +63,7 @@ modules:
         WHISPER_NO_AVX: ON
         WHISPER_NO_AVX2: ON
         PKG_CONFIG_PATH: /app/lib/pkgconfig
+        RUSTFLAGS: -C link-arg=-ljavascriptcoregtk-4.1
       build-args:
         - --share=network
         - --filesystem=host:rw

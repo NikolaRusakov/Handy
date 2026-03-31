@@ -441,6 +441,7 @@ pub fn run(cli_args: CliArgs) {
 
     #[allow(unused_mut)]
     let mut builder = tauri::Builder::default()
+        .plugin(tauri_plugin_single_instance::init(|app, args, cwd| {}))
         .device_event_filter(tauri::DeviceEventFilter::Always)
         .plugin(tauri_plugin_dialog::init())
         .plugin(
