@@ -32,6 +32,12 @@ finish-args:
   - --talk-name=solutions.doto.handy.SingleInstance # Remember to change net_mydomain_MyApp to your app ID
   - --own-name=solutions.doto.handy.SingleInstance # Remember to change net_mydomain_MyApp to your app ID
 modules:
+  - name: gtk-layer-shell
+    buildsystem: meson
+    sources:
+      - type: git
+        url: https://github.com/wmww/gtk-layer-shell.git
+        tag: v0.10.0
   - name: onnxruntime
     buildsystem: simple
     build-commands:
