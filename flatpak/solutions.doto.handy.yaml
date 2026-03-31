@@ -53,8 +53,10 @@ modules:
         ORT_PREFER_DYNAMIC_LINK: "1"
         WHISPER_NO_AVX: ON
         WHISPER_NO_AVX2: ON
+        PKG_CONFIG_PATH: /app/lib/pkgconfig
       build-args:
         - --share=network
+        - --filesystem=host:ro
     build-commands:
       - BUN_DEBUG=network bun-download/bun install --omit=dev --frozen
       - bun-download/bun run build
