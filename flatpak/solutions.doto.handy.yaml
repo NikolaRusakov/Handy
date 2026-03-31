@@ -72,10 +72,10 @@ modules:
       - bun-download/bun run build
       - cargo build --release --manifest-path src-tauri/Cargo.toml
       - install -Dm755 src-tauri/target/release/handy /app/bin/handy
-      - mkdir -p /app/bin/resources/models
-      - cp -r src-tauri/resources/. /app/bin/resources/
+      - mkdir -p /app/lib/Handy/models
+      - cp -r src-tauri/resources/. /app/lib/Handy/
       - ln -sf /app/share/handy/models/silero_vad_v4.onnx
-        /app/bin/resources/models/silero_vad_v4.onnx
+        /app/lib/Handy/models/silero_vad_v4.onnx
       - install -Dm644 src-tauri/icons/128x128.png
         /app/share/icons/hicolor/128x128/apps/solutions.doto.handy.png
       - install -Dm644 src-tauri/icons/128x128@2x.png

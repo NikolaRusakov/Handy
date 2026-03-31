@@ -190,17 +190,36 @@ fn initialize_core_logic(app_handle: &AppHandle) {
 
     // Choose the appropriate initial icon based on theme
     let initial_icon_path = tray::get_icon_path(initial_theme, tray::TrayIconState::Idle);
+    // let initial_icon_path = app.path().resolve("handy.png", tauri::path::BaseDirectory::Resource)?;
+
+    let resolved_icon = app_handle
+        .path()
+        .resolve(&initial_icon_path, tauri::path::BaseDirectory::Resource)
+        .unwrap_or_else(|e| {
+            panic!(
+                "Failed to resolve tray icon resource path '{}': {}",
+                initial_icon_path, e
+            )
+        });
+    log::debug!("Loading tray icon from: {:?}", resolved_icon);
 
     let tray = TrayIconBuilder::new()
-        .icon(
-            Image::from_path(
-                app_handle
-                    .path()
-                    .resolve(initial_icon_path, tauri::path::BaseDirectory::Resource)
-                    .unwrap(),
+        .icon(Image::from_path(&resolved_icon).unwrap_or_else(|e| {
+            panic!(
+                "Failed to load tray icon image from {:?}: {}",
+                resolved_icon, e
             )
-            .unwrap(),
-        )
+        }))
+        // let tray = TrayIconBuilder::new()
+        //     .icon(
+        //         Image::from_path(
+        //             app_handle
+        //                 .path()
+        //                 .resolve(initial_icon_path, tauri::path::BaseDirectory::Resource)
+        //                 .unwrap(),
+        //         )
+        // .unwrap(),
+        // )
         .tooltip(tray::tray_tooltip())
         .show_menu_on_left_click(true)
         .icon_as_template(true)

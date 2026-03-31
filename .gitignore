@@ -6,12 +6,12 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-
 package-lock.json
 
 # Flatpak generated offline source lists (produced by flatpak-builder-tools in CI)
 flatpak/cargo-sources.json
 flatpak/node-sources.json
+repo
 
 node_modules
 dist
