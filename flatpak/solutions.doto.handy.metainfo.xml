@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>solutions.doto.handy</id>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Handy</name>
+  <summary>Free, offline, open source speech to text</summary>
+  <description>
+    <p>
+      Handy is a cross-platform desktop speech-to-text application that works
+      completely offline. It uses OpenAI Whisper or NVIDIA Parakeet for
+      transcription and Silero VAD for voice activity detection.
+    </p>
+    <p>Features:</p>
+    <ul>
+      <li>Fully offline — no data leaves your machine</li>
+      <li>Global hotkey to start/stop recording from any application</li>
+      <li>Automatic paste after transcription</li>
+      <li>Multiple model sizes for different speed/accuracy tradeoffs</li>
+      <li>Voice activity detection to trim silence</li>
+      <li>Transcription history</li>
+    </ul>
+  </description>
+  <launchable type="desktop-id">solutions.doto.handy.desktop</launchable>
+  <url type="homepage">https://github.com/cjpais/Handy</url>
+  <url type="bugtracker">https://github.com/cjpais/Handy/issues</url>
+  <developer id="solutions.doto">
+    <name>doto solutions</name>
+  </developer>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="0.8.1" date="2025-01-01">
+      <description>
+        <p>Latest release.</p>
+      </description>
+    </release>
+  </releases>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/cjpais/Handy/main/src-tauri/resources/handy.png</image>
+      <caption>Handy main interface</caption>
+    </screenshot>
+  </screenshots>
+  <provides>
+    <binary>handy</binary>
+  </provides>
+  <requires>
+    <display_length compare="ge">768</display_length>
+  </requires>
+</component>

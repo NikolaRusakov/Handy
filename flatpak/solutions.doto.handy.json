@@ -1,0 +1,110 @@
+{
+  "id": "solutions.doto.handy",
+  "runtime": "org.freedesktop.Platform",
+  "runtime-version": "25.08",
+  "sdk": "org.freedesktop.Sdk",
+  "command": "handy",
+  "sdk-extensions": [
+    "org.freedesktop.Sdk.Extension.rust-stable",
+    "org.freedesktop.Sdk.Extension.node20"
+  ],
+  "build-options": {
+    "append-path": "/usr/lib/sdk/rust-stable/bin:/usr/lib/sdk/node20/bin",
+    "env": {
+      "CARGO_HOME": "/run/build/handy/cargo-home",
+      "RUSTFLAGS": "-C link-arg=-fuse-ld=lld",
+      "npm_config_offline": "true",
+      "npm_config_cache": "/run/build/handy/npm-cache"
+    }
+  },
+  "finish-args": [
+    "--share=ipc",
+    "--share=network",
+    "--socket=wayland",
+    "--socket=fallback-x11",
+    "--socket=pulseaudio",
+    "--device=all",
+    "--filesystem=home",
+    "--filesystem=xdg-config/autostart:create",
+    "--talk-name=org.freedesktop.portal.Desktop",
+    "--talk-name=org.freedesktop.portal.GlobalShortcuts",
+    "--talk-name=org.freedesktop.Notifications",
+    "--talk-name=org.gnome.SessionManager"
+  ],
+  "modules": [
+    {
+      "name": "onnxruntime",
+      "buildsystem": "simple",
+      "build-commands": [
+        "install -Dm755 onnxruntime-linux-x86_64-1.24.2/lib/libonnxruntime.so.1.24.2 /app/lib/libonnxruntime.so.1.24.2",
+        "ln -sf /app/lib/libonnxruntime.so.1.24.2 /app/lib/libonnxruntime.so.1",
+        "ln -sf /app/lib/libonnxruntime.so.1.24.2 /app/lib/libonnxruntime.so"
+      ],
+      "sources": [
+        {
+          "type": "archive",
+          "url": "https://blob.handy.computer/onnxruntime-linux-x86_64-1.24.2.tgz",
+          "sha256": "7e8062d5cda514fe3e31d805f9aabd50bed42d331994f66753d2dd697294b976",
+          "dest": "onnxruntime-linux-x86_64-1.24.2",
+          "strip-components": 0
+        }
+      ]
+    },
+    {
+      "name": "silero-vad-model",
+      "buildsystem": "simple",
+      "build-commands": [
+        "install -Dm644 silero_vad_v4.onnx /app/share/handy/models/silero_vad_v4.onnx"
+      ],
+      "sources": [
+        {
+          "type": "file",
+          "url": "https://blob.handy.computer/silero_vad_v4.onnx",
+          "sha256": "a35ebf52fd3ce5f1469b2a36158dba761bc47b973ea3382b3186ca15b1f5af28",
+          "dest-filename": "silero_vad_v4.onnx"
+        }
+      ]
+    },
+    {
+      "name": "handy",
+      "buildsystem": "simple",
+      "build-options": {
+        "env": {
+          "ORT_LIB_LOCATION": "/app/lib",
+          "ORT_PREFER_DYNAMIC_LINK": "1",
+          "WHISPER_NO_AVX": "ON",
+          "WHISPER_NO_AVX2": "ON"
+        }
+      },
+      "build-commands": [
+        "npm ci --offline",
+        "npm run build",
+        "cargo build --release --manifest-path src-tauri/Cargo.toml",
+        "install -Dm755 src-tauri/target/release/handy /app/bin/handy",
+        "mkdir -p /app/bin/resources/models",
+        "cp -r src-tauri/resources/. /app/bin/resources/",
+        "ln -sf /app/share/handy/models/silero_vad_v4.onnx /app/bin/resources/models/silero_vad_v4.onnx",
+        "install -Dm644 src-tauri/icons/128x128.png /app/share/icons/hicolor/128x128/apps/solutions.doto.handy.png",
+        "install -Dm644 src-tauri/icons/128x128@2x.png /app/share/icons/hicolor/256x256/apps/solutions.doto.handy.png",
+        "install -Dm644 src-tauri/icons/32x32.png /app/share/icons/hicolor/32x32/apps/solutions.doto.handy.png",
+        "install -Dm644 flatpak/solutions.doto.handy.desktop /app/share/applications/solutions.doto.handy.desktop",
+        "install -Dm644 flatpak/solutions.doto.handy.metainfo.xml /app/share/metainfo/solutions.doto.handy.metainfo.xml"
+      ],
+      "sources": [
+        "flatpak/cargo-sources.json",
+        "flatpak/node-sources.json",
+        {
+          "type": "dir",
+          "path": ".."
+        },
+        {
+          "type": "shell",
+          "commands": [
+            "mkdir -p .cargo",
+            "cp -vf cargo/config .cargo/config.toml"
+          ]
+        }
+      ]
+    }
+  ]
+}

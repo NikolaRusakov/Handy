@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Handy
+Comment=Free, offline, open source speech to text
+GenericName=Speech to Text
+Exec=handy
+Icon=solutions.doto.handy
+Type=Application
+Categories=Utility;Accessibility;AudioVideo;
+Keywords=speech;transcription;voice;whisper;dictation;
+StartupNotify=true
+StartupWMClass=handy

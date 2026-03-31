@@ -1,0 +1,141 @@
+name: Flatpak
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  flatpak:
+    name: Build & publish Flatpak (solutions.doto.handy)
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ── Tooling ────────────────────────────────────────────────────────────
+      - name: Install Flatpak tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            flatpak \
+            flatpak-builder \
+            python3-aiohttp \
+            python3-toml
+
+      - name: Add Flathub remote
+        run: |
+          flatpak remote-add --user --if-not-exists flathub \
+            https://dl.flathub.org/repo/flathub.flatpakrepo
+
+      - name: Install Flatpak runtime and SDK
+        run: |
+          flatpak install --user -y flathub \
+            org.freedesktop.Platform//25.08 \
+            org.freedesktop.Sdk//25.08 \
+            org.freedesktop.Sdk.Extension.rust-stable//25.08 \
+            org.freedesktop.Sdk.Extension.node20//25.08
+
+      # ── Generate offline source lists ──────────────────────────────────────
+      - name: Fetch flatpak-builder-tools
+        run: |
+          git clone --depth=1 \
+            https://github.com/flatpak/flatpak-builder-tools.git \
+            /tmp/flatpak-builder-tools
+
+      - name: Generate cargo sources
+        run: |
+          python3 /tmp/flatpak-builder-tools/cargo/flatpak-cargo-generator.py \
+            src-tauri/Cargo.lock \
+            -o flatpak/cargo-sources.json
+
+      - name: Generate npm lockfile
+        # Convert bun.lock to npm-compatible package-lock.json for the
+        # flatpak-node-generator (bun lockfile format is not supported by it).
+        run: npm install --package-lock-only --ignore-scripts
+
+      - name: Generate node sources
+        run: |
+          python3 /tmp/flatpak-builder-tools/node/flatpak-node-generator.py \
+            npm package-lock.json \
+            -o flatpak/node-sources.json
+
+      # ── Compute sha256 hashes for external blobs ──────────────────────────
+      #
+      # The manifest has placeholder sha256 fields for the ONNX Runtime and
+      # Silero VAD model archives.  This step downloads the files, computes
+      # their hashes, and patches the manifest in-place so flatpak-builder
+      # can verify them at build time.
+      #
+      - name: Patch manifest sha256 hashes
+        run: |
+          ORT_URL="https://blob.handy.computer/onnxruntime-linux-x86_64-1.24.2.tgz"
+          VAD_URL="https://blob.handy.computer/silero_vad_v4.onnx"
+
+          curl -fsSL -o /tmp/ort.tgz      "$ORT_URL"
+          curl -fsSL -o /tmp/silero.onnx  "$VAD_URL"
+
+          ORT_SHA=$(sha256sum /tmp/ort.tgz     | awk '{print $1}')
+          VAD_SHA=$(sha256sum /tmp/silero.onnx | awk '{print $1}')
+
+          echo "ORT sha256:    $ORT_SHA"
+          echo "Silero sha256: $VAD_SHA"
+
+          sed -i "s/FILL_IN_SHA256_RUN_sha256sum_onnxruntime-linux-x86_64-1.24.2.tgz/$ORT_SHA/" \
+            flatpak/solutions.doto.handy.json
+          sed -i "s/FILL_IN_SHA256_RUN_sha256sum_silero_vad_v4.onnx/$VAD_SHA/" \
+            flatpak/solutions.doto.handy.json
+
+      # ── Build ──────────────────────────────────────────────────────────────
+      - name: Build Flatpak
+        run: |
+          flatpak-builder \
+            --user \
+            --force-clean \
+            --state-dir=.flatpak-builder \
+            build-dir \
+            flatpak/solutions.doto.handy.json
+
+      # ── Local repo (for installation and artifact export) ──────────────────
+      - name: Export to local repository
+        run: |
+          flatpak-builder \
+            --user \
+            --force-clean \
+            --repo=flatpak-repo \
+            --state-dir=.flatpak-builder \
+            build-dir \
+            flatpak/solutions.doto.handy.json
+
+      - name: Create single-file bundle
+        run: |
+          flatpak build-bundle \
+            flatpak-repo \
+            solutions.doto.handy.flatpak \
+            solutions.doto.handy
+
+      # ── Local install (on self-hosted runner or local dev) ─────────────────
+      - name: Install from local repo
+        run: |
+          flatpak --user remote-add --no-gpg-verify --if-not-exists \
+            local-handy-repo flatpak-repo
+          flatpak --user install --or-update --noninteractive \
+            local-handy-repo solutions.doto.handy
+
+      # ── Artifacts ─────────────────────────────────────────────────────────
+      - name: Upload Flatpak bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: solutions.doto.handy-flatpak
+          path: solutions.doto.handy.flatpak
+          retention-days: 30
+
+      - name: Upload local repo
+        uses: actions/upload-artifact@v4
+        with:
+          name: solutions.doto.handy-repo
+          path: flatpak-repo/
+          retention-days: 30
